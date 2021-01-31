@@ -7,6 +7,9 @@ import (
 	"google.golang.org/grpc"
 )
 
+// TODO https://grpc.io/docs/languages/go/basics/
+// TODO https://github.com/improbable-eng/grpc-web/blob/master/client/grpc-web-react-example/go/exampleserver/exampleserver.go
+
 func main() {
 	grpcServer := grpc.NewServer()
 	_ = grpcServer
