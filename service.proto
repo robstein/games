@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+service Api {
+    rpc CreateGame(CreateGameRequest) returns (CreateGameResponse);
+    rpc JoinGame(JoinGameRequest) returns (JoinGameResponse);
+    rpc DescribeGame(DescribeGameRequest) returns (DescribeGameResponse);
+    rpc Move(MoveRequest) returns (MoveResponse);
+}
+
+message CreateGameRequest {
+    uint32 number_of_players = 1;
+}
+
+message CreateGameResponse {
+    string game_id = 1;
+}
+
+message JoinGameRequest {
+    string game_id = 1;
+    string username = 2;
+}
+
+message JoinGameResponse {
+    string player_id = 1;
+}
+
+message DescribeGameRequest {
+    string game_id = 1;
+    string username = 2;
+}
+
+message DescribeGameResponse {
+    GameState state = 1;
+}
+
+message MoveRequest {
+    string game_id = 1;
+    string username = 2;
+    Move move = 3;
+}
+
+message MoveResponse {
+    GameState next_state = 1;
+}
+
+message GameState {
+    repeated PlayerState player_states = 1;
+    repeated Card deck = 2;
+    repeated Card discard_pile = 3;
+    string whose_move_id = 4;
+}
+
+message PlayerState {
+    repeated Card hand = 1;
+    repeated Card public_holdings = 2;
+}
+
+message Card {
+    uint32 value = 1;
+    Property property = 2;
+    string action = 3;
+}
+
+message Property {
+    PropertyDetails active_property = 1;
+    PropertyDetails inactive_property = 2;
+}
+
+message PropertyDetails {
+    Color color = 1;
+    repeated RentDetail rent_details = 1;
+    string name = 3;
+}
+
+message RentDetail {
+    uint32 rent_with_one = 1;
+    uint32 rent_with_two = 2;
+    uint32 rent_with_three = 3;
+    uint32 rent_with_four = 4;
+}
+
+message Move {
+    
+}
