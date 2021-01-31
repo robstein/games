@@ -2,6 +2,6 @@
 
 ## Build
 
-- `brew install protobuf`
-- `go install google.golang.org/protobuf/cmd/protoc-gen-go`
-- ensure `$GOPATH/bin` is in your $PATH
+1. Install gRPC Go prerequisites https://grpc.io/docs/languages/go/quickstart/#prerequisites
+1. Install gRPC Typescript prerequisites: `cd client && yarn`
+1. `./protogen.sh`
