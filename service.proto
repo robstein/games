@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/robstein/games/service";
+option go_package = ".;service";
 
 service Api {
     rpc CreateGame(CreateGameRequest) returns (CreateGameResponse);
