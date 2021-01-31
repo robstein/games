@@ -8,6 +8,6 @@ protoc \
   --plugin=protoc-gen-go=${GOBIN}/protoc-gen-go \
   -I . \
   --js_out=import_style=commonjs,binary:./client/src/_proto \
-  --go-grpc_out=./server/proto \
+  --go_out=./server/proto \
   --ts_out=service=grpc-web:./client/src/_proto \
   ./service.proto
