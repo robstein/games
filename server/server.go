@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	pb "github.com/robstein/games/server/_proto/service"
+	pb "github.com/robstein/games/server/proto"
 	"google.golang.org/grpc"
 )
 
