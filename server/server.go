@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,9 +10,7 @@ import (
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	pb "github.com/robstein/games/server/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/status"
 )
 
 // Basic grpcweb server. See:
@@ -66,28 +63,4 @@ func main() {
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	(*w).Header().Set("Access-Control-Allow-Headers", "x-grpc-web,content-type")
-}
-
-type service struct {
-	pb.UnimplementedApiServer
-}
-
-func newServer() *service {
-	return &service{}
-}
-
-func (s *service) CreateGame(ctx context.Context, in *pb.CreateGameRequest) (*pb.CreateGameResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
-}
-
-func (s *service) JoinGame(ctx context.Context, in *pb.JoinGameRequest) (*pb.JoinGameResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
-}
-
-func (s *service) DescribeGame(ctx context.Context, in *pb.DescribeGameRequest) (*pb.DescribeGameResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
-}
-
-func (s *service) Move(ctx context.Context, in *pb.MoveRequest) (*pb.MoveResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
 }
