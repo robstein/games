@@ -5,10 +5,10 @@ import {Api} from './_proto/service_pb_service'
 import {CreateGameRequest} from './_proto/service_pb'
 import {grpc} from "@improbable-eng/grpc-web";
 
-const Host = "https://localhost:3000"
+const USE_TLS = false;
+const Host = USE_TLS ? "https://localhost:9091" : "http://localhost:9090"
 
 function App() {
-  
   return (
     <div className="App">
       <input type="button" value="New Tic Tac Toe Game" onClick={()=>{
@@ -17,6 +17,10 @@ function App() {
         grpc.unary(Api.CreateGame, {
           request: req,
           host: Host,
+          // metadata: {
+          //   "Access-Control-Allow-Origin": "*",
+          //   "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, HEAD, OPTIONS"
+          // },
           onEnd: (res) => {
             const { status, statusMessage, headers, message, trailers } = res;
             console.log("CreateGame.onEnd.status", status, statusMessage);
