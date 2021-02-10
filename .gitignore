@@ -1,3 +1,5 @@
 *.srl
 *.pem
 .DS_Store
+*.pb.go
+*_proto/*
