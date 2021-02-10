@@ -15,14 +15,16 @@ function GameGettingStarted(props: {}) {
   const [gameCode, setGameCode] = useState<string>("");
 
   const {
-    state: { data: gameId, error: createGameError },
+    state: { data: createdGameId, error: createGameError },
     execute: doCreate,
   } = useCreateGameApi(2);
+
+  const gameId = createdGameId || gameCode;
 
   const {
     state: { data: playerId, error: joinGameError },
     execute: joinGame,
-  } = useJoinGameApi(username, gameId || gameCode);
+  } = useJoinGameApi(username, gameId);
 
   if (createGameError) {
     return <>Error: {createGameError}</>;
@@ -38,10 +40,10 @@ function GameGettingStarted(props: {}) {
         Welcome to game {gameId} , player {playerId}
       </>
     );
-  } else if (gameId) {
+  } else if (createdGameId) {
     return (
       <>
-        Game created! Invite your friends to: {gameId}
+        Game created! Invite your friends to: {createdGameId}
         <div>
           <div>
             <input
