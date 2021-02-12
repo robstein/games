@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	pb "github.com/robstein/games/server/proto"
@@ -24,6 +26,8 @@ var (
 )
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	flag.Parse()
 
 	port := 9090

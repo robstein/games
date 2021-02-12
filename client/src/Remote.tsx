@@ -3,6 +3,8 @@ import { Api } from "./_proto/service_pb_service";
 import {
   CreateGameRequest,
   CreateGameResponse,
+  DescribeGameRequest,
+  DescribeGameResponse,
   JoinGameRequest,
   JoinGameResponse,
 } from "./_proto/service_pb";
@@ -96,5 +98,18 @@ export function useJoinGameApi(
   return useApi(Api.JoinGame, req, (message: ProtobufMessage) => {
     const typed = message as JoinGameResponse;
     return typed.getPlayerId();
+  });
+}
+
+export function useDescribeGameApi(
+  username: string,
+  gameId: string, 
+): { state: State; execute: () => void } {
+  const req = new DescribeGameRequest();
+  req.setUsername(username);
+  req.setGameId(gameId);
+  return useApi(Api.DescribeGame, req, (message: ProtobufMessage) => {
+    const typed = message as DescribeGameResponse;
+    return typed.getState();
   });
 }

@@ -45,7 +45,13 @@ func (s *service) JoinGame(ctx context.Context, in *pb.JoinGameRequest) (*pb.Joi
 }
 
 func (s *service) DescribeGame(ctx context.Context, in *pb.DescribeGameRequest) (*pb.DescribeGameResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
+	game, err := s.db.getGame(in.GetUsername(), in.GetGameId())
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DescribeGameResponse{
+		State: game.ToProto(),
+	}, nil
 }
 
 func (s *service) Move(ctx context.Context, in *pb.MoveRequest) (*pb.MoveResponse, error) {

@@ -27,3 +27,11 @@ func (d *Dao) assignUserToGame(username string, gameId string) (string, error) {
 	}
 	return game.AssignNewUser(username)
 }
+
+func (d *Dao) getGame(username string, gameId string) (*Game, error) {
+	game, ok := d.games[gameId]
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Game not found")
+	}
+	return game, nil
+}

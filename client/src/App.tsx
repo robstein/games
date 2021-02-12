@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { useCreateGameApi, useJoinGameApi } from "./Remote";
+import Game from './Game'
 
 function App() {
   return (
@@ -36,9 +37,7 @@ function GameGettingStarted(props: {}) {
 
   if (gameId && playerId) {
     return (
-      <>
-        Welcome to game {gameId} , player {playerId}
-      </>
+      <Game gameId={gameId} playerId={playerId} />
     );
   } else if (createdGameId) {
     return (
