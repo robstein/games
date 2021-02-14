@@ -5,8 +5,6 @@ import (
 
 	pb "github.com/robstein/games/server/proto"
 	uuid "github.com/satori/go.uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type service struct {
@@ -55,5 +53,17 @@ func (s *service) DescribeGame(ctx context.Context, in *pb.DescribeGameRequest) 
 }
 
 func (s *service) Move(ctx context.Context, in *pb.MoveRequest) (*pb.MoveResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "Unimplemented")
+	game, err := s.db.getGame(in.GetUsername(), in.GetGameId())
+	if err != nil {
+		return nil, err
+	}
+
+	err = game.update(in.GetUsername(), in.GetMove())
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.MoveResponse{
+		NextState: game.ToProto(),
+	}, nil
 }

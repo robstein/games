@@ -7,6 +7,10 @@ import {
   DescribeGameResponse,
   JoinGameRequest,
   JoinGameResponse,
+  Move,
+  MoveRequest,
+  MoveResponse,
+  TicTacToeMove,
 } from "./_proto/service_pb";
 import { grpc } from "@improbable-eng/grpc-web";
 import { ProtobufMessage } from "@improbable-eng/grpc-web/dist/typings/message";
@@ -24,38 +28,39 @@ type Action =
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "request":
-      return { isLoading: true };
+      return { ...state, isLoading: true };
     case "success":
-      return { isLoading: false, data: action.result };
+      return { ...state, isLoading: false, data: action.result };
     case "failure":
-      return { isLoading: false, error: action.error };
+      return { ...state, isLoading: false, error: action.error };
   }
 }
 
 export function useApi(
   methodDescriptor: any,
   request: ProtobufMessage,
-  onSuccess: (message: ProtobufMessage) => any
-): { state: State; execute: () => void } {
+  onSuccess: (message: ProtobufMessage) => any,
+  onRequest?: (req: ProtobufMessage, trigger: any) => ProtobufMessage
+): { state: State; setTrigger: React.Dispatch<any> } {
   const [state, dispatch] = useReducer(reducer, { isLoading: false });
 
-  const [gate, setGate] = useState<string | undefined>();
-  const execute = useCallback(() => {
-    setGate(new Date().toString());
-  }, []);
+  const [trigger, setTrigger] = useState<any | undefined>();
 
   useEffect(() => {
     let isCancelled = false;
-    const fn = () => {
+    const fn = (trigger: any | undefined) => {
       dispatch({ type: "request" });
+      const req = onRequest ? onRequest(request, trigger) : request;
+      console.log("Method: ", methodDescriptor);
+      console.log("Request: ", req.toObject());
       grpc.unary(methodDescriptor, {
-        request: request,
+        request: req,
         host: Host,
         onEnd: (res) => {
           if (!isCancelled) {
             const { status, statusMessage, headers, message, trailers } = res;
             if (status === grpc.Code.OK && message) {
-              console.log(message.toObject());
+              console.log("Response: ", message.toObject());
               dispatch({ type: "success", result: onSuccess(message) });
             } else {
               dispatch({ type: "failure", error: statusMessage.toString() });
@@ -65,16 +70,16 @@ export function useApi(
       });
     };
 
-    if (gate) {
-      fn();
+    if (trigger) {
+      fn(trigger);
     }
 
     return () => {
       isCancelled = true;
     };
-  }, [gate]);
+  }, [trigger]);
 
-  return { state: state, execute: execute };
+  return { state: state, setTrigger: setTrigger };
 }
 
 export function useCreateGameApi(
@@ -82,10 +87,18 @@ export function useCreateGameApi(
 ): { state: State; execute: () => void } {
   const req = new CreateGameRequest();
   req.setNumberOfPlayers(numPlayers);
-  return useApi(Api.CreateGame, req, (message: ProtobufMessage) => {
-    const typed = message as CreateGameResponse;
-    return typed.getGameId();
-  });
+  const { state, setTrigger } = useApi(
+    Api.CreateGame,
+    req,
+    (message: ProtobufMessage) => {
+      const typed = message as CreateGameResponse;
+      return typed.getGameId();
+    }
+  );
+  const execute = useCallback(() => {
+    setTrigger(new Date().toString());
+  }, []);
+  return { state: state, execute: execute };
 }
 
 export function useJoinGameApi(
@@ -95,21 +108,67 @@ export function useJoinGameApi(
   const req = new JoinGameRequest();
   req.setUsername(username);
   req.setGameId(gameId);
-  return useApi(Api.JoinGame, req, (message: ProtobufMessage) => {
-    const typed = message as JoinGameResponse;
-    return typed.getPlayerId();
-  });
+  const { state, setTrigger } = useApi(
+    Api.JoinGame,
+    req,
+    (message: ProtobufMessage) => {
+      const typed = message as JoinGameResponse;
+      return typed.getPlayerId();
+    }
+  );
+  const execute = useCallback(() => {
+    setTrigger(new Date().toString());
+  }, []);
+  return { state: state, execute: execute };
 }
 
 export function useDescribeGameApi(
   username: string,
-  gameId: string, 
+  gameId: string
 ): { state: State; execute: () => void } {
   const req = new DescribeGameRequest();
   req.setUsername(username);
   req.setGameId(gameId);
-  return useApi(Api.DescribeGame, req, (message: ProtobufMessage) => {
-    const typed = message as DescribeGameResponse;
-    return typed.getState();
-  });
+  const { state, setTrigger } = useApi(
+    Api.DescribeGame,
+    req,
+    (message: ProtobufMessage) => {
+      const typed = message as DescribeGameResponse;
+      return typed.getState();
+    }
+  );
+  const execute = useCallback(() => {
+    setTrigger(new Date().toString());
+  }, []);
+  return { state: state, execute: execute };
+}
+
+export function useMoveApi(
+  username: string,
+  gameId: string
+): { state: State; execute: React.Dispatch<any> } {
+  const move = new Move();
+  move.setTicTacToeMove(new TicTacToeMove());
+
+  const req = new MoveRequest();
+  req.setUsername(username);
+  req.setGameId(gameId);
+  req.setMove(move);
+  const { state, setTrigger } = useApi(
+    Api.Move,
+    req,
+    (message: ProtobufMessage) => {
+      const typed = message as MoveResponse;
+      if (typed.getNextState) {
+        return typed.getNextState();
+      }
+    },
+    (req: ProtobufMessage, trigger: any) => {
+      const typed = req as MoveRequest;
+      typed.getMove()?.getTicTacToeMove()?.setX(trigger.x);
+      typed.getMove()?.getTicTacToeMove()?.setY(trigger.y);
+      return typed;
+    }
+  );
+  return { state: state, execute: setTrigger };
 }

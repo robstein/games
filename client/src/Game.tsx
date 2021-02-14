@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useDescribeGameApi } from "./Remote";
+import { useDescribeGameApi, useMoveApi } from "./Remote";
 import { GameState, GameStatus, PropertyDetails } from "./_proto/service_pb";
 
 export default function Game(props: { gameId: string; playerId: string }) {
@@ -19,6 +19,15 @@ export default function Game(props: { gameId: string; playerId: string }) {
     };
   }, []);
 
+  const {
+    state: {
+      data: nextGamestate,
+      isLoading: isLoadingNextGameState,
+      error: moveError,
+    },
+    execute: executeMove,
+  } = useMoveApi(props.playerId, props.gameId);
+
   const game = gameState as GameState;
   let gameView;
   if (game) {
@@ -30,8 +39,17 @@ export default function Game(props: { gameId: string; playerId: string }) {
       <>
         {waitingForPlayers && <div>Waiting for players to join</div>}
         <div>{yourMove ? "Your move!" : game.getWhoseMoveId() + "'s move"}</div>
-        {flattenedArray && <Board flattenedArray={flattenedArray} />}
-        {flattenedArray}
+        {flattenedArray && (
+          <Board
+            gameId={props.gameId}
+            playerId={props.playerId}
+            flattenedArray={flattenedArray}
+            onMove={(coordinates) => {
+              executeMove(coordinates);
+              fetchGameState();
+            }}
+          />
+        )}
       </>
     );
   }
@@ -61,16 +79,24 @@ function stateToColor(e: string): string {
   return "white";
 }
 
-function Board(props: { flattenedArray: string }) {
-  console.log(Array.from(props.flattenedArray));
+function Board(props: {
+  gameId: string;
+  playerId: string;
+  flattenedArray: string;
+  onMove: (coordinates: { x: number; y: number }) => void;
+}) {
   return (
     <div
       style={{
+        margin: "auto",
+        width: "166px",
         display: "grid",
         gridTemplateColumns: "50px 50px 50px",
         gridTemplateRows: "50px 50px 50px",
         columnGap: "8px",
         rowGap: "8px",
+        padding: "16px",
+        cursor: "pointer",
       }}
     >
       {Array.from(props.flattenedArray).map((e, i) => {
@@ -83,7 +109,8 @@ function Board(props: { flattenedArray: string }) {
               border: "solid 1px black",
             }}
             onClick={() => {
-              // executeMove(i)
+              const coordinates = { x: i % 3, y: Math.floor(i / 3) };
+              props.onMove(coordinates);
             }}
           >
             {e}
